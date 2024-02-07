@@ -2,7 +2,7 @@
 # Copyright (c) 2022-2024 SMALLPROGRAM <https://github.com/smallprogram>
 # Description: Auto.update.packages
 #
-name: "Auto update packages v2"
+name: "Auto.update.packages"
 on:
   repository_dispatch:
   workflow_dispatch:
