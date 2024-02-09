@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2022-2024 SMALLPROGRAM <https://github.com/smallprogram>
+# Copyright (c) 2023-2024 zijieKwok
 # Description: Auto.update.packages
 #
 name: "Auto.update.packages"
@@ -20,17 +20,7 @@ on:
       is_update_geodata:
         description: 'is update geodata'
         required: false
-        default: 'false'
-
-      is_update_brook:
-        description: 'is update brook'
-        required: false
-        default: 'false'
-
-      is_update_chinadns-ng:
-        description: 'is update chinadns-ng'
-        required: false
-        default: 'false'
+        default: 'false'  
   schedule:
     - cron: "0 */4 * * *"
 env:
@@ -70,7 +60,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        pakcages: [brook, chinadns-ng, hysteria, ipt2socks, microsocks, shadowsocks-rust, sing-box, trojan, trojan-go, v2ray-core, v2ray-plugin, xray-core, xray-plugin, v2ray-geoip, v2ray-geosite]
+        pakcages: [brook, chinadns-ng, hysteria, ipt2socks, microsocks,sing-box, trojan, trojan-go, v2ray-core, v2ray-plugin, xray-core, xray-plugin, v2ray-geoip, v2ray-geosite]
         include:
           - pakcages: brook
             folder: brook
@@ -122,16 +112,6 @@ jobs:
             release_download_url: https://codeload.github.com/rofl0r/microsocks/tar.gz/v
             file_name:
 
-          - pakcages: shadowsocks-rust
-            folder: shadowsocks-rust
-            version_line: 9
-            hash_line: 14
-            version_head: PKG_VERSION:=
-            hash_head: PKG_HASH:=
-            release_api_command: wget -qO- -t5 -T5 "https://api.github.com/repos/shadowsocks/shadowsocks-rust/releases" | grep "tag_name" | head -n 1 | awk -F ":" '{print $2}' | sed 's/\"//g;s/,//g;s/ //g' | awk -F 'v' '{print $2}'
-            release_download_url: https://codeload.github.com/shadowsocks/shadowsocks-rust/tar.gz/v
-            file_name:
-            
           - pakcages: sing-box
             folder: sing-box
             version_line: 9
@@ -249,7 +229,7 @@ jobs:
           fi
 
           if [ "$is_continue" = "true" ]; then
-            cd && cd work/openwrt-passwall-packages/openwrt-passwall-packages/${{ matrix.folder }} 
+            cd && cd work/JacKwok-passwall/JacKwok-passwall/${{ matrix.folder }} 
             Old_PKG_VERSION=$(sed -n '${{ matrix.version_line }}p' Makefile | awk -F '=' '{print $2}')
             New_PKG_VERSION=$(${{ matrix.release_api_command }})
             echo "${{ matrix.pakcages }}目前版本: $Old_PKG_VERSION"
@@ -270,7 +250,7 @@ jobs:
         id: update
         if: steps.check.outputs.status == 'success' && steps.check.outputs.New_PKG_VERSION != '' && !cancelled()
         run: |
-          cd && cd work/openwrt-passwall-packages/openwrt-passwall-packages/${{ matrix.folder }}
+          cd && cd work/JacKwok-passwall/JacKwok-passwall/${{ matrix.folder }}
           New_PKG_VERSION=${{ steps.check.outputs.New_PKG_VERSION }}
           sed -i "${{ matrix.version_line }}c ${{ matrix.version_head }}$New_PKG_VERSION" Makefile
           cd && cd packages && mkdir -p ${{ matrix.pakcages }} && cd ${{ matrix.pakcages }}
@@ -280,7 +260,7 @@ jobs:
           is_v=$(echo ${{ matrix.release_download_url }} | awk -F/ '{print $NF}')
 
           if [ ! -n "${{ matrix.file_name }}" ]; then PKG_HASH=$(sha256sum $is_v$New_PKG_VERSION) && PKG_HASH=${PKG_HASH%% *}; else PKG_HASH=$(sha256sum ${file_name##*/}) && PKG_HASH=${PKG_HASH%% *}; fi;
-          cd && cd work/openwrt-passwall-packages/openwrt-passwall-packages/${{ matrix.folder }} 
+          cd && cd work/JacKwok-passwall/JacKwok-passwall/${{ matrix.folder }} 
           sed -i "${{ matrix.hash_line }}c ${{ matrix.hash_head }}$PKG_HASH" Makefile
           echo "已更新${{ matrix.pakcages }}版本到: $New_PKG_VERSION"
           echo "${{ matrix.pakcages }} Hash:$PKG_HASH"
@@ -288,7 +268,7 @@ jobs:
           echo ":white_check_mark: ${{ matrix.pakcages }}: update to $New_PKG_VERSION" >> commit_messages.txt
           echo "version=$New_PKG_VERSION" >> $GITHUB_OUTPUT
 
-          cd && cd work/openwrt-passwall-packages/openwrt-passwall-packages
+          cd && cd work/JacKwok-passwall/JacKwok-passwall
           echo "branch_exists=$(git ls-remote --heads origin patches-${{ matrix.pakcages }}-$New_PKG_VERSION | tr -d '\n')" >> $GITHUB_OUTPUT
 
       - name: Create Pull Request
@@ -298,11 +278,11 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "${{ matrix.pakcages }}: update to ${{ steps.update.outputs.version }}"
-          committer: smallprogram <smallprogram@foxmail.com>
-          author: smallprogram <smallprogram@foxmail.com>
+          committer: zijieKwok <xiujie520999@gmail.com>
+          author: zijieKwok <xiujie520999@gmail.com>
           signoff: false
           branch: patches-${{ matrix.pakcages }}-${{ steps.update.outputs.version }}
-          base: main
+          base: master
           delete-branch: true
           body: |
             ${{ matrix.pakcages }}: update to ${{ steps.update.outputs.version }}
