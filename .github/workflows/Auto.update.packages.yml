@@ -20,7 +20,22 @@ on:
       is_update_geodata:
         description: 'is update geodata'
         required: false
-        default: 'false'  
+        default: 'false'
+
+      is_update_brook:
+        description: 'is update brook'
+        required: false
+        default: 'false'
+	  
+	  is_update_chinadns-ng:
+        description: 'is update chinadns-ng'
+        required: false
+        default: 'false'
+	  
+	  is_update_hysteria:
+        description: 'is update hysteria'
+        required: false
+        default: 'false'
   schedule:
     - cron: "0 */4 * * *"
 env:
